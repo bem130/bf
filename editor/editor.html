@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>bf editor</title>
+        <meta charset="utf-8">
+        <link href="txt.css" rel="stylesheet">
+    </head>
+    <body>
+        <div>
+            <pre class="codearea" id="codearea" contenteditable="true" spellcheck="false"><br></pre>
+            <div class="codearea" id="highlight" spellcheck="false"></div>
+            <div id="linearea"></div>
+            <div id="inputarea">input >> <textarea id="input"></textarea></div>
+            <button onclick="run()" id="run">run</button>
+            <div id="resultarea">result >> <span id="result"></span></div>
+        </div>
+    </body>
+</html>
+<script src="../run.js"></script>
+<script>
+
+function run() {
+    code = document.getElementById("codearea").innerText
+    args = document.getElementById("input").value;
+    argsb = new Uint8Array((new TextEncoder("utf-8")).encode(args));
+    console.log("run:",[code,args]);
+    let runtime = new BFi(code,argsb);
+    runtime.runall();
+    document.getElementById("result").innerHTML = runtime.getOut();
+}
+
+</script>
+<script>
+
+
+function txttokenaize(c) {
+    let p = 0;
+    let token = []
+    while (p<c.length) {
+        if (c[p]==" ") {
+            let scomment = p
+            while (c[p]==" ") {
+                p++;
+            }
+            token.push(["BLANK",c.slice(scomment,p)])
+            continue;
+        }
+        else if (c[p]=="\n") {
+            p+=1;
+            token.push(["CR","\n"])
+            continue;
+        }
+        if ([">","<","+","-",".",",","[","]"].indexOf(c[p])!=-1) {
+            token.push(["TXT",c[p]]);
+        }
+        else {
+            token.push(["COMMENT",c[p]]);
+        }
+        p++;
+    }
+    token.push(["EOF",""])
+    return token;
+}
+
+function highlight() {
+    tokens = txttokenaize(codeelm.innerText);
+    outelm.innerHTML = "";
+    linearea.innerHTML = "";
+        let linecnt = 1;
+    for (let t=0;t<tokens.length;t++) {
+        if (tokens[t][0]=="CR") {
+            linecnt++;
+        }
+        thistoken = document.createElement("pre");
+        thistoken.innerHTML += tokens[t][1];
+        thistoken.className = "txt " + tokens[t][0];
+        outelm.append(thistoken);
+    }
+    for (let l=1;l<linecnt;l++) {
+        lintken = document.createElement("pre");
+        lintken.innerHTML = l.toString()+"\n";
+        linearea.appendChild(lintken);
+    }
+}
+
+outelm = document.getElementById("highlight");
+codeelm = document.getElementById("codearea");
+linearea = document.getElementById("linearea");
+codeelm.onkeyup = highlight;
+codeelm.onkeydown = highlight;
+
+codeelm.addEventListener("paste", function(e) { // 参考: https://qiita.com/tashinoso/items/5519a5fa56e7585d8a93
+    e.preventDefault();
+    var text = e.clipboardData.getData("text/plain")+"<br>";
+    document.execCommand("insertHTML", false, text);
+});
+
+highlight()
+
+</script>
+<style>
+    * {
+        font-family: monospace;
+        color: white;
+    }
+    pre.codearea {
+        display: block;
+        background-color: black;
+    }
+    pre {
+        margin: 0px;
+        display: inline;
+    }
+    .codearea {
+        width: min-content;
+        min-height: calc(100vh - 40px);
+        min-width: calc(100vw - 300px);
+        margin: 0px;
+        padding: 20px;
+        padding-left: 80px;
+        border-radius: 10px;
+        top: 10px;
+        position: absolute;
+        top: 0px;
+        left: 0px;
+        font-size: 23px;
+        background: rgb(0,0,0,0);
+        color: rgb(255, 255, 255);
+        border: 0px;
+        display: block;
+        outline: none;
+    }
+    body {
+        background-color: black;
+        background-color: rgb(58, 58, 58);
+    }
+
+    #linearea {
+        padding-left: 5px;
+        width: 55px;
+        margin: 0px;
+        padding: 0px;
+        padding-top: 20px;
+        padding-bottom: 20px;
+        padding-right: 10px;
+        position: absolute;
+        top: 0px;
+        left: 0px;
+        display: block;
+        font-size: 23px;
+        text-align: right;
+        background: rgb(81, 84, 91);
+        color: rgb(235, 235, 235);
+    }
+
+    #inputarea {
+        top: 0px;
+        position: absolute;
+        right: 0px;
+        width: 180px;
+        padding: 10px;
+        height: calc(100vh - 80px);
+        overflow: scroll;
+    }
+    #input {
+        background: none;
+        border: none;
+        height: 40px;
+    }
+    #run {
+        position: absolute;
+        top: 70px;
+        right: 0px;
+        height: 30px;
+        width: 200px;
+        background-color: black;
+    }
+    #resultarea {
+        position: absolute;
+        top: 100px;
+        right: 0px;
+        width: 180px;
+        padding: 10px;
+        height: calc(100vh - 80px);
+        overflow: scroll;
+    }
+
+</style>
