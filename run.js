@@ -1,7 +1,7 @@
 class BFi {
     #prog;#data;#iptr;#dptr;#istr;#ostr;#ispt;#ospt;#jadr; // 宣言
-    constructor(program="",args=[]) { // 初期化
-        this.#prog = this.tbyte(program); // プログラム
+    constructor(program,args=[0],pass=true) { // 初期化
+        this.#prog = this.tbyte(program,pass); // プログラム
         this.#jadr = this.#sjadr(this.#prog); // ブラケットアドレス
         this.#data = new Uint8Array(1024); // データ
         this.#istr = new Uint8Array(args); // 標準入力
@@ -12,6 +12,7 @@ class BFi {
         this.#ospt = 0; // 標準出力ポインタ
     }
     next() { // 一つの命令を実行する
+        if (this.#iptr>=this.#prog.length) {console.warn("end runnning")}
         switch (this.#prog[this.#iptr]) {
             case 0:
                 this.#dptr++; // nresize
@@ -43,12 +44,12 @@ class BFi {
             break;
         }
         this.#iptr++;
-        return;
+        return this;
     }
     runall() { // 最後まで命令を実行する(最大10000)
         let cnt = 0;
         while (cnt<10000&&this.#iptr<this.#prog.length) {cnt++;this.next();}
-        return this.getOut();
+        return this;
     }
     #sjadr(prog) { // ジャンプ先を探す
         let ocnt = 0; let ccnt = 0;
@@ -64,7 +65,7 @@ class BFi {
         for (let i=0;i<ccnt;i++) {jadr[cary[i]] = oary[i];}
         return jadr;
     }
-    tbyte(program,pass=false) { // テキストを数値の配列に変換する
+    tbyte(program,pass=true) { // テキストを数値の配列に変換する
         let prog = new Uint8ClampedArray(program.length);let tptr = 0;
         let ins = [">","<","+","-",".",",","[","]"];
         for (let p=0;p<program.length;p++) {
