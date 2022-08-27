@@ -19,20 +19,43 @@
 <script src="../run.js"></script>
 <script>
 
+
 function run() {
-    code = document.getElementById("codearea").innerText
-    args = document.getElementById("input").value;
-    argsb = Array.from(new Uint8Array((new TextEncoder("utf-8")).encode(args)));
+    let code = document.getElementById("codearea").innerText;
+    let args = document.getElementById("input").value;
+    let argsb = Array.from(new Uint8Array((new TextEncoder("utf-8")).encode(args)));
     argsb.push(0);
     console.log("run:",[code,args]);
     let runtime = new BFi(code,argsb);
-    runtime.runall();
-    document.getElementById("result").innerHTML = runtime.getOut();
+    {
+        let cnt = 0;
+        runnext(runtime,cnt,eedited);
+    }
+}
+function runnext(runtime,cnt,srunning) {
+    cnt++;
+    if (cnt>10000) {
+        resultelm.innerHTML = "実行長さの制限(10000)により中断しました";
+        return false;
+    }
+    if (srunning!=eedited) {
+        resultelm.innerHTML = "コードが編集された為、実行を中断しました";
+        return false;
+    }
+    let bfiptr = runtime.getIptr();
+    runtime.next();
+    let iptr = runtime.getIptr();
+    bfcs[bfiptr].classList.remove("running");
+    if (iptr<bfcs.length) {
+        bfcs[iptr].classList.add("running");
+        setTimeout(runnext,0,runtime,cnt,srunning);
+    }
+    resultelm.innerHTML = runtime.getOut();
+    return;
 }
 
 </script>
 <script>
-
 
 function txttokenaize(c) {
     let p = 0;
@@ -63,11 +86,16 @@ function txttokenaize(c) {
     return token;
 }
 
+let bfcs = [];
+let eedited = Date.now();
 function highlight() {
-    tokens = txttokenaize(codeelm.innerText);
+    localStorage.setItem("bfeditor.codedata.1",codeelm.innerText);
+    eedited = Date.now();
+    bfcs = [];
+    let tokens = txttokenaize(codeelm.innerText);
     outelm.innerHTML = "";
     linearea.innerHTML = "";
-        let linecnt = 1;
+    let linecnt = 1;
     for (let t=0;t<tokens.length;t++) {
         if (tokens[t][0]=="CR") {
             linecnt++;
@@ -76,6 +104,9 @@ function highlight() {
         thistoken.innerHTML += tokens[t][1];
         thistoken.className = "txt " + tokens[t][0];
         outelm.append(thistoken);
+        if (tokens[t][0]=="TXT") {
+            bfcs.push(thistoken);
+        }
     }
     for (let l=1;l<linecnt;l++) {
         lintken = document.createElement("pre");
@@ -84,9 +115,10 @@ function highlight() {
     }
 }
 
-outelm = document.getElementById("highlight");
-codeelm = document.getElementById("codearea");
-linearea = document.getElementById("linearea");
+let outelm = document.getElementById("highlight");
+let codeelm = document.getElementById("codearea");
+let linearea = document.getElementById("linearea");
+let resultelm = document.getElementById("result");
 codeelm.onkeyup = highlight;
 codeelm.onkeydown = highlight;
 
@@ -96,6 +128,14 @@ codeelm.addEventListener("paste", function(e) { // 参考: https://qiita.com/tas
     document.execCommand("insertHTML", false, text);
 });
 
+
+{
+    let bfore = localStorage.getItem("bfeditor.codedata.1");
+    if (bfore!=null) {
+        codeelm.innerText = bfore;
+        console.log("restore before code");
+    }
+}
 highlight()
 
 </script>

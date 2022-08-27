@@ -12,7 +12,7 @@ class BFi {
         this.#ospt = 0; // 標準出力ポインタ
     }
     next() { // 一つの命令を実行する
-        if (this.#iptr>=this.#prog.length) {console.warn("end runnning")}
+        if (this.endRunning()) {console.warn("end runnning")}
         switch (this.#prog[this.#iptr]) {
             case 0:
                 this.#dptr++; // nresize
@@ -48,7 +48,7 @@ class BFi {
     }
     runall() { // 最後まで命令を実行する(最大10000)
         let cnt = 0;
-        while (cnt<10000&&this.#iptr<this.#prog.length) {cnt++;this.next();}
+        while (cnt<10000&&!this.endRunning()) {cnt++;this.next();}
         return this;
     }
     #sjadr(prog) { // ジャンプ先を探す
@@ -75,6 +75,7 @@ class BFi {
         }
         return prog;
     }
+    endRunning() {if(this.#iptr>=this.#prog.length){return true};return false;}
     nextRead() {if(this.#prog[this.#iptr]==5){return true};return false;}
     getOut(format="utf-8") {return (new TextDecoder(format)).decode(new Uint8Array(this.#ostr.slice(0,this.#ospt)));} // 出力をテキストで取得
     getBinOut() {return new Uint8Array(this.#ostr.slice(0,this.#ospt))} // 出力を配列で取得

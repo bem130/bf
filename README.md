@@ -16,8 +16,8 @@ BFi.runall 関数で最後まで実行 (10000ステップの制限付き)
 ```js
 let code = ",."; // 標準入力の1文字目を出力するコード例
 
-args = "hello"; // 標準入力のテキストデータ
-argsb = new Uint8Array((new TextEncoder("utf-8")).encode(args)); // 標準入力をバイト列に変換
+let args = "hello"; // 標準入力のテキストデータ
+let argsb = new Uint8Array((new TextEncoder("utf-8")).encode(args)); // 標準入力をバイト列に変換
 
 let runtime = new BFi(code,argsb); // 初期化
 runtime.next(); // 1ステップ実行

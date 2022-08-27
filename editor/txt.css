@@ -12,6 +12,9 @@ pre.txt {
 .TXT.txt {
     color: rgb(255, 255, 255);
 }
+.TXT.running.txt {
+    background-color: aquamarine;
+}
 .COMMENT.txt {
     color: rgb(103, 185, 95);
 }
