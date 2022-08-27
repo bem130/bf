@@ -8,13 +8,13 @@ class BF {
     ispt; // 標準入力ポインタ
     ospt; // 標準出力ポインタ
     jadr; // ブラケットアドレス
-    constructor(program="",args="") { // 初期化
+    constructor(program="",args=[]) { // 初期化
         this.prog = this.tbyte(program);
-        this.data = new Uint8ClampedArray(1024);
+        this.data = new Uint8Array(1024);
         this.iptr = 0;
         this.dptr = 0;
-        this.istr = new Uint8ClampedArray(1024);
-        this.ostr = new Uint8ClampedArray(1024);
+        this.istr = new Uint8Array(args);
+        this.ostr = new Uint8Array(1024);
         this.ispt = 0;
         this.ospt = 0;
         this.jadr = this.sjadr(this.prog);
@@ -66,6 +66,9 @@ class BF {
     }
     getOut() { // 出力を取得
         return (new TextDecoder("utf-8")).decode(new Uint8Array(this.ostr.slice(0,this.ospt)));
+    }
+    getBinOut() {
+        return new Uint8Array(this.ostr.slice(0,this.ospt))
     }
     sjadr(prog) { // ジャンプ先を探す
         let jadr = new Uint8ClampedArray(prog.length);
