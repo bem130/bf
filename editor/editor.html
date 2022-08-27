@@ -8,7 +8,7 @@
     <body>
         <div>
             <div id="editorarea">
-                <pre class="codearea" id="codearea" contenteditable="true" spellcheck="false"></pre>
+                <textarea class="codearea" id="codearea" spellcheck="false"></textarea>
                 <pre class="codearea" id="highlight" spellcheck="false"></pre>
                 <div id="linearea"></div>
             </div>
@@ -23,8 +23,7 @@
 <script>
 
 function run() {
-    showmem();
-    let code = document.getElementById("codearea").innerText;
+    showmem();;
     let args = document.getElementById("input").value;
     let argsb = Array.from(new Uint8Array((new TextEncoder("utf-8")).encode(args)));
     argsb.push(0);
@@ -120,18 +119,17 @@ let bfcs = [];
 let eedited = Date.now();
 let bftext = ""
 function highlight() {
-    if (bftext==codeelm.innerText) {
-        return;
-    }
-    bftext = codeelm.innerText;
-    localStorage.setItem("bfeditor.codedata.1",codeelm.innerText);
+    code = codeelm.value;
+    if (code==bftext) {return}
+    bftext = code;
+    localStorage.setItem("bfeditor.codedata.1",code);
     eedited = Date.now();
     showmem();
     bfcs = [];
-    let tokens = txttokenaize(codeelm.innerText);
+    let tokens = txttokenaize(code);
     outelm.innerHTML = "";
     linearea.innerHTML = "";
-    let linecnt = 1;
+    let linecnt = 2;
     for (let t=0;t<tokens.length;t++) {
         if (tokens[t][0]=="CR") {
             linecnt++;
@@ -149,24 +147,27 @@ function highlight() {
         lintken.innerHTML = l.toString()+"\n";
         linearea.appendChild(lintken);
     }
+    resizecodearea();
 }
+
+function resizecodearea() {
+    codearea.style.width = (outelm.clientWidth-90)+"px";
+    codearea.style.height = (outelm.clientWidth-0)+"px";
+}
+setInterval(resizecodearea,10)
 
 let outelm = document.getElementById("highlight");
 let codeelm = document.getElementById("codearea");
+let code = codeelm.value;
 let linearea = document.getElementById("linearea");
 let resultelm = document.getElementById("result");
 codeelm.onkeyup = highlight;
 codeelm.onkeydown = highlight;
 
-codeelm.addEventListener("paste", function(e) { // 参考: https://qiita.com/tashinoso/items/5519a5fa56e7585d8a93
-    e.preventDefault();
-    var text = e.clipboardData.getData("text/plain")+"<br>";
-    document.execCommand("insertHTML", false, text);
-});
 {
     let bfore = localStorage.getItem("bfeditor.codedata.1");
     if (bfore!=null) {
-        codeelm.innerText = bfore;
+        codeelm.innerHTML = bfore;
         console.log("restore before code");
     }
 }
@@ -183,12 +184,17 @@ showmem()
     *::-webkit-scrollbar{
         display: none;
     }
-    pre.codearea {
-        display: block;
+    textarea.codearea {
+        width: fit-content;
+        white-space: wrap;
+    }
+    #highlight {
+        white-space: nowrap;
     }
     pre {
         margin: 0px;
         display: inline;
+        font-size: 23px;
     }
     body {
         overflow: hidden;
@@ -203,8 +209,8 @@ showmem()
         background: rgb(31, 37, 51);
     }
     .codearea {
+        font-family: monospace;
         width: fit-content;
-        white-space: nowrap;
         min-height: calc(100vh - 90px);
         min-width: calc(100vw - 310px);
         margin: 0px;
