@@ -69,12 +69,13 @@ class BFi {
         let prog = new Uint8ClampedArray(program.length);let tptr = 0;
         let ins = [">","<","+","-",".",",","[","]"];
         for (let p=0;p<program.length;p++) {
-            let tins = ins.indexOf(program[p])
+            let tins = ins.indexOf(program[p]);
             if (tins==-1) { if(pass){continue;} tins=8;}
             prog[tptr] = tins; tptr++;
         }
         return prog;
     }
+    nextRead() {if(this.#prog[this.#iptr]==5){return true};return false;}
     getOut(format="utf-8") {return (new TextDecoder(format)).decode(new Uint8Array(this.#ostr.slice(0,this.#ospt)));} // 出力をテキストで取得
     getBinOut() {return new Uint8Array(this.#ostr.slice(0,this.#ospt))} // 出力を配列で取得
     getProg() {return this.#prog}

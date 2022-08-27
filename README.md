@@ -24,7 +24,6 @@ runtime.next(); // 1ステップ実行
 runtime.runall(); // 最後まで実行
 ```
 
-
 ## 標準出力
 
 BFi.getOut 関数で文字列として取得
