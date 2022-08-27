@@ -8,8 +8,8 @@
     <body>
         <div>
             <div id="editorarea">
-                <pre class="codearea" id="codearea" contenteditable="true" spellcheck="false"><br></pre>
-                <div class="codearea" id="highlight" spellcheck="false"></div>
+                <pre class="codearea" id="codearea" contenteditable="true" spellcheck="false"></pre>
+                <pre class="codearea" id="highlight" spellcheck="false"></pre>
                 <div id="linearea"></div>
             </div>
             <div id="memarea"></div>
@@ -118,7 +118,12 @@ function txttokenaize(c) {
 
 let bfcs = [];
 let eedited = Date.now();
+let bftext = ""
 function highlight() {
+    if (bftext==codeelm.innerText) {
+        return;
+    }
+    bftext = codeelm.innerText;
     localStorage.setItem("bfeditor.codedata.1",codeelm.innerText);
     eedited = Date.now();
     showmem();
@@ -180,7 +185,6 @@ showmem()
     }
     pre.codearea {
         display: block;
-        background-color: black;
     }
     pre {
         margin: 0px;
@@ -196,10 +200,13 @@ showmem()
         min-height: calc(100vh - 50px);
         width: calc(100vw - 200px);
         overflow: auto;
+        background: rgb(31, 37, 51);
     }
     .codearea {
+        width: fit-content;
+        white-space: nowrap;
         min-height: calc(100vh - 90px);
-        width: calc(100vw - 310px);
+        min-width: calc(100vw - 310px);
         margin: 0px;
         padding: 20px;
         padding-left: 80px;
@@ -215,7 +222,6 @@ showmem()
         outline: none;
     }
     body {
-        background-color: black;
         background-color: rgb(58, 58, 58);
     }
 
@@ -287,11 +293,13 @@ showmem()
         left: 0px;
         height: 50px;
         width: 100vw;
-        background-color: rgb(74, 59, 87);
+        background-color: rgb(45, 35, 53);
+        color: rgb(255, 255, 255);
         overflow: scroll;
     }
     .select.mem {
-        background-color: rgb(127, 81, 171);
+        background-color: rgb(64, 56, 70);
+        color: rgb(247, 255, 204);
     }
 
 </style>
