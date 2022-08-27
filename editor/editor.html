@@ -7,9 +7,12 @@
     </head>
     <body>
         <div>
-            <pre class="codearea" id="codearea" contenteditable="true" spellcheck="false"><br></pre>
-            <div class="codearea" id="highlight" spellcheck="false"></div>
-            <div id="linearea"></div>
+            <div id="editorarea">
+                <pre class="codearea" id="codearea" contenteditable="true" spellcheck="false"><br></pre>
+                <div class="codearea" id="highlight" spellcheck="false"></div>
+                <div id="linearea"></div>
+            </div>
+            <div id="memarea"></div>
             <button onclick="run()" id="run">run</button>
             <div id="inputarea">input >> <textarea id="input" spellcheck="false"></textarea></div>
             <div id="resultarea">output >> <span id="result"></span></div>
@@ -19,8 +22,8 @@
 <script src="../run.js"></script>
 <script>
 
-
 function run() {
+    showmem();
     let code = document.getElementById("codearea").innerText;
     let args = document.getElementById("input").value;
     let argsb = Array.from(new Uint8Array((new TextEncoder("utf-8")).encode(args)));
@@ -46,12 +49,39 @@ function runnext(runtime,cnt,srunning) {
     runtime.next();
     let iptr = runtime.getIptr();
     bfcs[bfiptr].classList.remove("running");
+    showmem(runtime.getData(),runtime.getDptr());
     if (iptr<bfcs.length) {
         bfcs[iptr].classList.add("running");
         setTimeout(runnext,0,runtime,cnt,srunning);
     }
     resultelm.innerHTML = runtime.getOut();
     return;
+}
+function showmem(memdata=(new Array(1024).fill(0)),select=0) {
+    let table = document.createElement("table");
+    let adrselm = document.createElement("tr");
+    let dataelm = document.createElement("tr");
+    for (i=0;i<memdata.length;i++) {
+        let adrs = document.createElement("td");
+        adrs.innerHTML = zerob(i);
+        let datas = document.createElement("td");
+        datas.innerHTML = zerob(memdata[i]);
+        if (select==i) {
+            adrs.className = "mem select"
+            datas.className = "mem select"
+        }
+        adrselm.appendChild(adrs);
+        dataelm.appendChild(datas);
+    }
+    table.appendChild(adrselm);
+    table.appendChild(dataelm);
+    document.getElementById("memarea").innerHTML = "";
+    document.getElementById("memarea").appendChild(table);
+}
+
+function zerob(num) {
+    let strnum = num.toString(10)
+    return ("0000"+strnum).slice(-4);
 }
 
 </script>
@@ -91,6 +121,7 @@ let eedited = Date.now();
 function highlight() {
     localStorage.setItem("bfeditor.codedata.1",codeelm.innerText);
     eedited = Date.now();
+    showmem();
     bfcs = [];
     let tokens = txttokenaize(codeelm.innerText);
     outelm.innerHTML = "";
@@ -127,8 +158,6 @@ codeelm.addEventListener("paste", function(e) { // 参考: https://qiita.com/tas
     var text = e.clipboardData.getData("text/plain")+"<br>";
     document.execCommand("insertHTML", false, text);
 });
-
-
 {
     let bfore = localStorage.getItem("bfeditor.codedata.1");
     if (bfore!=null) {
@@ -137,12 +166,17 @@ codeelm.addEventListener("paste", function(e) { // 参考: https://qiita.com/tas
     }
 }
 highlight()
+showmem()
 
 </script>
 <style>
     * {
         font-family: monospace;
         color: white;
+        -ms-overflow-style: none;
+    }
+    *::-webkit-scrollbar{
+        display: none;
     }
     pre.codearea {
         display: block;
@@ -152,14 +186,23 @@ highlight()
         margin: 0px;
         display: inline;
     }
+    body {
+        overflow: hidden;
+    }
+    #editorarea {
+        position: absolute;
+        top: 0px;
+        left: 0px;
+        min-height: calc(100vh - 50px);
+        width: calc(100vw - 200px);
+        overflow: auto;
+    }
     .codearea {
-        width: min-content;
-        min-height: calc(100vh - 40px);
-        min-width: calc(100vw - 300px);
+        min-height: calc(100vh - 90px);
+        width: calc(100vw - 310px);
         margin: 0px;
         padding: 20px;
         padding-left: 80px;
-        border-radius: 10px;
         top: 10px;
         position: absolute;
         top: 0px;
@@ -236,6 +279,19 @@ highlight()
     }
     #result {
         display: block;
+    }
+
+    #memarea {
+        position: fixed;
+        bottom: 0px;
+        left: 0px;
+        height: 50px;
+        width: 100vw;
+        background-color: rgb(74, 59, 87);
+        overflow: scroll;
+    }
+    .select.mem {
+        background-color: rgb(127, 81, 171);
     }
 
 </style>
