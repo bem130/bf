@@ -5,6 +5,11 @@
     </head>
 </html>
 <script>
-runtime = new BF("+++++++ [>++++++++<-] >[<+>-]<.")
-console.log(runtime.runall())
+let code = `
+,.,.,.,.
+`;
+args = `afej afewa`;
+argsb = Array.from(new Uint8Array((new TextEncoder("utf-8")).encode(args)));argsb.push(0);
+runtime = new BFi(code,argsb);
+console.log(runtime.runall());
 </script>
