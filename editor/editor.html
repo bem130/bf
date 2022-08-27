@@ -10,9 +10,9 @@
             <pre class="codearea" id="codearea" contenteditable="true" spellcheck="false"><br></pre>
             <div class="codearea" id="highlight" spellcheck="false"></div>
             <div id="linearea"></div>
-            <div id="inputarea">input >> <textarea id="input"></textarea></div>
             <button onclick="run()" id="run">run</button>
-            <div id="resultarea">result >> <span id="result"></span></div>
+            <div id="inputarea">input >> <textarea id="input" spellcheck="false"></textarea></div>
+            <div id="resultarea">output >> <span id="result"></span></div>
         </div>
     </body>
 </html>
@@ -22,7 +22,8 @@
 function run() {
     code = document.getElementById("codearea").innerText
     args = document.getElementById("input").value;
-    argsb = new Uint8Array((new TextEncoder("utf-8")).encode(args));
+    argsb = Array.from(new Uint8Array((new TextEncoder("utf-8")).encode(args)));
+    argsb.push(0);
     console.log("run:",[code,args]);
     let runtime = new BFi(code,argsb);
     runtime.runall();
@@ -42,7 +43,7 @@ function txttokenaize(c) {
             while (c[p]==" ") {
                 p++;
             }
-            token.push(["BLANK",c.slice(scomment,p)])
+            token.push(["BLANK",c.slice(scomment,p)]);
             continue;
         }
         else if (c[p]=="\n") {
@@ -153,8 +154,21 @@ highlight()
         color: rgb(235, 235, 235);
     }
 
-    #inputarea {
+    #run {
+        position: absolute;
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        border-radius: 5px;
         top: 0px;
+        right: 0px;
+        height: 30px;
+        width: 200px;
+        background-color: rgb(55, 55, 55);
+    }
+    #run:hover {
+        background-color: rgb(0, 0, 0);
+    }
+    #inputarea {
+        top: 30px;
         position: absolute;
         right: 0px;
         width: 180px;
@@ -165,15 +179,11 @@ highlight()
     #input {
         background: none;
         border: none;
+        width: 180px;
         height: 40px;
-    }
-    #run {
-        position: absolute;
-        top: 70px;
-        right: 0px;
-        height: 30px;
-        width: 200px;
-        background-color: black;
+        padding: 0px;
+        outline: none;
+        resize: none;
     }
     #resultarea {
         position: absolute;
@@ -181,8 +191,11 @@ highlight()
         right: 0px;
         width: 180px;
         padding: 10px;
-        height: calc(100vh - 80px);
+        height: calc(100vh - 120px);
         overflow: scroll;
+    }
+    #result {
+        display: block;
     }
 
 </style>

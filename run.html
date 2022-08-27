@@ -9,6 +9,7 @@
     
     args = "hello";
     argsb = new Uint8Array((new TextEncoder("utf-8")).encode(args));
+    argsb.push(0);
     
     let runtime = new BFi(code,argsb);
     runtime.next();
