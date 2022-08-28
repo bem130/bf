@@ -52,17 +52,38 @@ class BFi {
         return this;
     }
     #sjadr(prog) { // ジャンプ先を探す
-        let ocnt = 0; let ccnt = 0;
+        let bcnt = 0;
         let jadr = new Uint8ClampedArray(prog.length);
-        let oary = new Uint8ClampedArray(prog.length);
-        let cary = new Uint8ClampedArray(prog.length);
         for (let i=0;i<prog.length;i++) {
-            if (prog[i]==6) {oary[ocnt] = i; ocnt++;}
-            else if (prog[i]==7) {cary[ccnt] = i; ccnt++;}
+            if (prog[i]==6) {
+                bcnt++;
+                let opni = i;
+                let opnb = bcnt+1;
+                let clsi = 0;
+                for (let j=i;j<prog.length;j++) {
+                    if (prog[j]==6) {
+                        bcnt++;
+                    }
+                    else if (prog[j]==7) {
+                        console.log(bcnt,opnb)
+                        if (bcnt==opnb) {
+                            console.log("found")
+                            clsi = j
+                            break
+                        }
+                        bcnt--;
+                    }
+                }
+                jadr[opni] = clsi;
+                jadr[clsi] = opni;
+            }
+            else if (prog[i]==7) {
+                bcnt--;
+            }
         }
-        if (ocnt!=ccnt) {console.error("bracket number is not match");}
-        for (let i=0;i<ocnt;i++) {jadr[oary[i]] = cary[i];}
-        for (let i=0;i<ccnt;i++) {jadr[cary[i]] = oary[i];}
+        console.log(bcnt)
+        if (bcnt!=1) {console.error("bracket number is not match");}
+        console.log(jadr)
         return jadr;
     }
     tbyte(program,pass=true) { // テキストを数値の配列に変換する
